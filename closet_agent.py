@@ -73,6 +73,36 @@ def search_outfits_by_category(category: str, limit: int = 5) -> list:
             break
     return matches
 
+# Tool 4: search outfits by multiple clothing categories 
+@tool
+def search_outfits_by_categories(categories: list[str], limit: int = 5) -> list:
+    """Search Polyvore outfits that contain all requested clothing categories.
+
+Args:
+    categories: A list of clothing categories that must all appear in the outfit.
+    limit: The maximum number of matching outfits to return.
+"""
+    matches = []
+
+    for outfit in outfits:
+        outfit_categories = []
+
+        for item in outfit["items"]:
+            item_id = item["item_id"]
+            item_info = item_metadata.get(item_id, {})
+            semantic_category = item_info.get("semantic_category")
+
+            if semantic_category:
+                outfit_categories.append(semantic_category)
+
+        # checks if all requested categories are present in the outfit
+        if all(category in outfit_categories for category in categories):
+            matches.append(outfit)
+
+        if len(matches) >= limit:
+            break
+    return matches
+
 # Model: connectes your program to the Qwen2 model running locally through Ollama
 model = LiteLLMModel(
 # creating something and storing it in a variable called: model
@@ -86,7 +116,12 @@ model = LiteLLMModel(
 
 # Agent: 
 agent = CodeAgent(
-    tools=[get_outfit, get_item_info, search_outfits_by_category],
+    tools=[
+    get_outfit,
+    get_item_info,
+    search_outfits_by_category,
+    search_outfits_by_categories
+],
     # gives the agent permission to use that tool
     model=model,
     # tells the agent to use the model you created above as its brain
@@ -114,3 +149,8 @@ agent = CodeAgent(
 #     "Loop directly through that list and return the set_id from each outfit."
 # )
 
+# Version 4 Test
+agent.run(
+    "Find 3 Polyvore outfits that contain both tops and shoes. "
+    "Use search_outfits_by_categories and return the set_id of each matching outfit."
+)
