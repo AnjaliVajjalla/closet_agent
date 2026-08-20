@@ -10,9 +10,9 @@ with open("polyvore_item_metadata.json", "r") as file:
     item_metadata = json.load(file)
 
 # Temporary tests so we can inspect the data
-print(outfits[0])
-print(type(item_metadata))
-print(next(iter(item_metadata.items())))
+# print(outfits[0])
+# print(type(item_metadata))
+# print(next(iter(item_metadata.items())))
 
 # Tool 1: get one outfit from the dataset
 @tool
@@ -101,7 +101,7 @@ Args:
 
         if len(matches) >= limit:
             break
-    return matches
+    return [outfit["set_id"] for outfit in matches]
 
 # Model: connectes your program to the Qwen2 model running locally through Ollama
 model = LiteLLMModel(
@@ -150,7 +150,17 @@ agent = CodeAgent(
 # )
 
 # Version 4 Test
+# agent.run(
+#     "Find 3 Polyvore outfits that contain both tops and shoes. "
+#     "Use search_outfits_by_categories and return the set_id of each matching outfit."
+# )
+
+# Version 5 Test A
+# agent.run(
+#     "Find 3 Polyvore outfits that contain shoes and return the set_id of each matching outfit."
+# )
+
+# Version 5 Test B
 agent.run(
-    "Find 3 Polyvore outfits that contain both tops and shoes. "
-    "Use search_outfits_by_categories and return the set_id of each matching outfit."
+    "Find 3 Polyvore outfits that contain both tops and shoes and return the set_id of each matching outfit."
 )
