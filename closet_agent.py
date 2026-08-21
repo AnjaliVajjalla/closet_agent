@@ -78,10 +78,15 @@ def search_outfits_by_category(category: str, limit: int = 5) -> list:
 def search_outfits_by_categories(categories: list[str], limit: int = 5) -> list:
     """Search Polyvore outfits that contain all requested clothing categories.
 
-Args:
-    categories: A list of clothing categories that must all appear in the outfit.
-    limit: The maximum number of matching outfits to return.
-"""
+    Returns a list of dictionaries. Each dictionary contains:
+    - "set_id": the outfit's ID
+    - "categories": a list of clothing categories in the outfit
+
+    Args:
+        categories: A list of clothing categories that must all appear in the outfit.
+        limit: The maximum number of matching outfits to return.
+    """
+    
     matches = []
 
     for outfit in outfits:
@@ -97,11 +102,14 @@ Args:
 
         # checks if all requested categories are present in the outfit
         if all(category in outfit_categories for category in categories):
-            matches.append(outfit)
+            matches.append({
+                "set_id": outfit["set_id"],
+                "categories": outfit_categories
+            })
 
         if len(matches) >= limit:
             break
-    return [outfit["set_id"] for outfit in matches]
+    return matches
 
 # Model: connectes your program to the Qwen2 model running locally through Ollama
 model = LiteLLMModel(
@@ -161,6 +169,18 @@ agent = CodeAgent(
 # )
 
 # Version 5 Test B
+# agent.run(
+#     "Find 3 Polyvore outfits that contain both tops and shoes and return the set_id of each matching outfit."
+# )
+
+# Version 6 Test A
+# agent.run(
+#     "Use search_outfits_by_categories to find 3 Polyvore outfits containing both tops and shoes. "
+#     "Return the structured results."
+# )
+
+# Version 6 Test B
 agent.run(
-    "Find 3 Polyvore outfits that contain both tops and shoes and return the set_id of each matching outfit."
+    "Find 3 Polyvore outfits containing both tops and shoes. "
+    "For each outfit, give me its set_id and clothing categories."
 )
